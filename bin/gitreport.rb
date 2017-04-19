@@ -1,8 +1,37 @@
 #!/usr/bin/env ruby
 
 require 'date'
+require 'optparse'
 
-num_weeks = ARGV[0]
+num_weeks = 0
+dir = ""
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: gitreport.rb [options]"
+
+  opts.on("-n", "--num-weeks NUM", Integer, "Number of weeks to run report on (required).") do |x|
+    num_weeks = x
+  end
+
+  opts.on("-d", "--directory DIR", String, "Directory to run report on (optional).") do |x|
+    dir = ""
+  end
+
+  opts.on('-h', '--help', 'Displays Help') do
+    puts opts
+    exit
+  end
+
+end.parse!
+
+if num_weeks <= 0
+  puts "Must specify number of weeks > 0."
+  exit
+end
+
+if !dir.blank?
+  Dir.chdir(dir)
+end
 
 today = Date.today
 
@@ -13,7 +42,6 @@ all_logs.each_line do |l|
   split_line = l.gsub(/^\s+/, '').split("<")[0].split("  ")
   authors[split_line[1].gsub(/\s+$/, '')] = [split_line[0]]
 end
-#puts authors.inspect
 
 weeks = ["Name", "Total"]
 num_weeks.times do |t|
