@@ -35,19 +35,21 @@ end
 
 today = Date.today
 
-all_logs = `git log --after="#{num_weeks} weeks ago" --before="0 weeks ago" | grep Author | sed 's!Author:!!g' | sort | uniq -c`
+all_logs = `git log --no-merges --after="#{num_weeks} weeks ago" --before="0 weeks ago" | grep "Author: " | sed 's!Author:!!g' | sort | uniq -c`
 
 authors = {}
 all_logs.each_line do |l|
-  split_line = l.gsub(/^\s+/, '').split("<")[0].split("  ")
-  authors[split_line[1].gsub(/\s+$/, '')] = [split_line[0]]
+  split_line = l.strip.gsub('>', '').split("<")
+  count_uname = split_line[0].split("  ")
+  email = split_line[1]
+  authors[count_uname[1].gsub(/\s+$/, '')] = [email, count_uname[0]]
 end
 
-weeks = ["Name", "Total"]
+weeks = ["Name", "Email", "Total"]
 num_weeks.times do |t|
   weeks << (today - (7*t)).strftime("%m/%d/%Y")
   authors.keys.each do |a|
-    this_weeks_log = `git log --after="#{t+1} weeks ago" --before="#{t} weeks ago" --author="#{a}" | grep Author`.lines.count
+    this_weeks_log = `git log --no-merges --after="#{t+1} weeks ago" --before="#{t} weeks ago" --author="#{a}" | grep Author`.lines.count
     authors[a] << this_weeks_log
   end
 end
