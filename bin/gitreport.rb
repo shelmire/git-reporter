@@ -29,7 +29,7 @@ if num_weeks <= 0
   exit
 end
 
-if !dir.blank?
+if !(dir == "")
   Dir.chdir(dir)
 end
 
